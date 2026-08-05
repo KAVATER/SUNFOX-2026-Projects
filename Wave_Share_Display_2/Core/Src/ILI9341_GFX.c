@@ -167,49 +167,79 @@ void ILI9341_DrawFilledRectangleCoord(uint16_t X0, uint16_t Y0, uint16_t X1, uin
 	ILI9341_DrawRectangle(X0True, Y0True, xLen, yLen, color);
 }
 
-void ILI9341_DrawChar(char ch, const uint8_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
+//void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
+//{
+//	if ((ch < 31) || (ch > 127)) return;
+//
+//	uint16_t fOffset, fWidth, fHeight, fBPL;
+//	uint16_t *tempChar;
+//
+//	fOffset = font[0];
+//	fWidth = font[1];
+//	fHeight = font[2];
+//	fBPL = font[3];
+//
+//	tempChar = (uint16_t*)&font[((ch - 0x20) * fOffset) + 4]; /* Current Character = Meta + (Character Index * Offset) */
+//
+//	/* Clear background first */
+//	ILI9341_DrawRectangle(X, Y, fWidth, fHeight, bgcolor);
+//
+//	for (int j=0; j < fHeight; j++)
+//	{
+//		for (int i=0; i < fWidth; i++)
+//		{
+//			uint16_t z =  tempChar[fBPL * i + ((j & 0xFFF0) >> 4) + 1]; /* (j & 0xF8) >> 3, increase one by 8-bits */
+//			uint16_t b = 1 << (j & 0x0F);                              /* j % 16 selects the bit */
+//			if (( z & b ) != 0x00)
+//			{
+//				ILI9341_DrawPixel(X+i, Y+j, color);
+//			}
+//		}
+//	}
+//}
+
+void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
 {
 	if ((ch < 31) || (ch > 127)) return;
 
-	uint8_t fOffset, fWidth, fHeight, fBPL;
-	uint8_t *tempChar;
+	uint16_t fOffset, fWidth, fHeight, fBPL;
+	uint16_t *tempChar;
 
 	fOffset = font[0];
-	fWidth = font[1];
+	fWidth  = font[1];
 	fHeight = font[2];
-	fBPL = font[3];
+	fBPL    = font[3];
 
-	tempChar = (uint8_t*)&font[((ch - 0x20) * fOffset) + 4]; /* Current Character = Meta + (Character Index * Offset) */
+	tempChar = (uint16_t*)&font[((ch - 0x20) * fOffset) + 4];
 
 	/* Clear background first */
 	ILI9341_DrawRectangle(X, Y, fWidth, fHeight, bgcolor);
 
-	for (int j=0; j < fHeight; j++)
+	for (int j = 0; j < fHeight; j++)
 	{
-		for (int i=0; i < fWidth; i++)
+		for (int i = 0; i < fWidth; i++)
 		{
-			uint8_t z =  tempChar[fBPL * i + ((j & 0xF8) >> 3) + 1]; /* (j & 0xF8) >> 3, increase one by 8-bits */
-			uint8_t b = 1 << (j & 0x07);
-			if (( z & b ) != 0x00)
+			uint16_t z = tempChar[fBPL * i + ((j & 0xFFF0) >> 4) + 1];
+			uint16_t b = 1 << (j & 0x0F);
+			if ((z & b) != 0x00)
 			{
-				ILI9341_DrawPixel(X+i, Y+j, color);
+				ILI9341_DrawPixel(X + i, Y + j, color);
 			}
 		}
 	}
 }
-
-void ILI9341_DrawText(const char* str, const uint8_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
+void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
 {
-	uint8_t charWidth;			/* Width of character */
-	uint8_t fOffset = font[0];	/* Offset of character */
-	uint8_t fWidth = font[1];	/* Width of font */
+	uint16_t charWidth;			/* Width of character */
+	uint16_t fOffset = font[0];	/* Offset of character */
+	uint16_t fWidth = font[1];	/* Width of font */
 
 	while (*str)
 	{
 		ILI9341_DrawChar(*str, font, X, Y, color, bgcolor);
 
 		/* Check character width and calculate proper position */
-		uint8_t *tempChar = (uint8_t*)&font[((*str - 0x20) * fOffset) + 4];
+		uint16_t *tempChar = (uint16_t*)&font[((*str - 0x20) * fOffset) + 4];
 		charWidth = tempChar[0];
 
 		if(charWidth + 2 < fWidth)
