@@ -102,7 +102,7 @@ int main(void)
 
 	ILI9341_FillScreen(WHITE);
 
-	ILI9341_DrawText("SUNFOX", FONT3, 75, 85, BLUE, WHITE);
+	ILI9341_DrawText("SUNFOX", FONT3, 65, 85, BLUE, WHITE);
 
 	HAL_Delay(2000);
 
