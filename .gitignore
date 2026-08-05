@@ -1,0 +1,147 @@
+# ============================================================
+# Common
+# ============================================================
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+*.txt
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# ============================================================
+# Personal / Local files (Do not commit)
+# ============================================================
+
+# Excel processing scripts
+Excel_python_Script/
+
+# LibreOffice / OpenOffice spreadsheets
+*.ods
+
+# Excel workbooks
+*.xlsx
+*.xls
+
+# Beyond Compare installer and session files
+BCompare*.exe
+*.bcompare
+
+# ============================================================
+# VS Code
+# ============================================================
+
+.vscode/settings.json
+.vscode/ipch
+.vscode/.browse*
+.vscode/*.db
+
+# Keep launch/tasks/extensions if desired
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+
+# ============================================================
+# STM32CubeIDE
+# ============================================================
+
+Debug/
+Release/
+build/
+
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+
+# Generated dependency files
+*.d
+*.su
+
+# CubeIDE metadata
+.metadata/
+
+# Generated object files
+*.o
+*.obj
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+Makefile
+
+# Ninja
+.ninja*
+build.ninja
+
+# ============================================================
+# Zephyr / NCS
+# ============================================================
+
+build/
+build*/
+twister-out/
+coverage/
+
+# Zephyr generated files
+zephyr/.config
+zephyr/.config.old
+zephyr/include/generated/
+zephyr/zephyr.*
+zephyr/.cmake/
+
+# ============================================================
+# Python
+# ============================================================
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# ============================================================
+# Segger / Debugging
+# ============================================================
+
+*.jlink
+JLinkLog.txt
+JLinkDevices.xml
+OzoneWorkspace*
+*.svd.cache
+
+# ============================================================
+# CTest
+# ============================================================
+
+Testing/
+
+# ============================================================
+# Archives
+# ============================================================
+
+*.zip
+*.7z
+*.rar
+
+# ============================================================
+# Backup files
+# ============================================================
+
+*~
+*.orig
