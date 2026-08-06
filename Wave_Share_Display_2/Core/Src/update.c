@@ -79,3 +79,39 @@ void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16
 		str++;
 	}
 }
+
+void ILI9341_DrawImage(const uint8_t* image, uint8_t orientation)
+{
+    uint16_t w = ILI9341_SCREEN_WIDTH;
+    uint16_t h = ILI9341_SCREEN_HEIGHT;
+
+    if(orientation == SCREEN_HORIZONTAL_1 || orientation == SCREEN_HORIZONTAL_2)
+    {
+        ILI9341_SetRotation(orientation);
+        ILI9341_SetAddress(0, 0, w - 1, h - 1);  // Inclusive coordinates!
+    }
+    else
+    {
+        ILI9341_SetRotation(orientation);
+        ILI9341_SetAddress(0, 0, h - 1, w - 1);  // Swap w/h for vertical
+    }
+
+    uint32_t total_bytes = (uint32_t)w * h * 2;  // RGB565 = 2 bytes/pixel
+    uint32_t counter = 0;
+
+    while(counter < total_bytes)
+    {
+        uint32_t chunk = total_bytes - counter;
+        if(chunk > BURST_MAX_SIZE)
+            chunk = BURST_MAX_SIZE;
+
+        // Ensure we never split a 16-bit pixel across bursts!
+        if((chunk % 2) != 0)
+            chunk--;  // Make it even
+
+        ILI9341_WriteBuffer((uint8_t*)(image + counter), chunk);
+        counter += chunk;
+
+        DelayUs(1);
+    }
+}

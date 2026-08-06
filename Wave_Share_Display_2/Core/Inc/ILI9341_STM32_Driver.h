@@ -38,10 +38,10 @@ extern SPI_HandleTypeDef hspi1;
 #define GREENYELLOW 			0xAFE5
 #define PINK        			0xF81F
 
-#define SCREEN_VERTICAL_1		0
-#define SCREEN_HORIZONTAL_1		1
-#define SCREEN_VERTICAL_2		2
-#define SCREEN_HORIZONTAL_2		3
+#define SCREEN_VERTICAL_1    0   // portrait
+#define SCREEN_VERTICAL_2    1   // portrait, flipped 180°
+#define SCREEN_HORIZONTAL_1  2   // landscape
+#define SCREEN_HORIZONTAL_2  3   // landscape, flipped 180°
 
 void ILI9341_WriteCommand(uint8_t cmd);
 void ILI9341_WriteData(uint8_t data);

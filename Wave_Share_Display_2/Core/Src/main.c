@@ -26,6 +26,7 @@
 #include "ILI9341_STM32_Driver.h"
 #include "ILI9341_GFX.h"
 #include "snow_tiger.h"
+#include "image_data.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -104,7 +105,13 @@ int main(void)
 
 	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
 
-	HAL_Delay(2000);
+	HAL_Delay(1500);
+
+	ILI9341_DrawImage(myImage,SCREEN_HORIZONTAL_2);
+
+	HAL_Delay(500);
+
+	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
 
 //	ILI9341_SetRotation(SCREEN_HORIZONTAL_2);
 //	ILI9341_FillScreen(BLACK);
@@ -118,7 +125,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
   }
   /* USER CODE END 3 */
 }
