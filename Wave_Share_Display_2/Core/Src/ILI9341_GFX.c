@@ -9,6 +9,19 @@ __STATIC_INLINE void DelayUs(volatile uint32_t us)
 	while (us--);
 }
 
+//uint16_t dX = 0;
+//uint16_t dY = 0;
+//uint16_t pX = 0;
+//uint16_t pY = 0;
+//uint16_t pHeight = 0;
+//uint16_t pWidth = 0;
+
+/* For tracking previous string dimension */
+static uint16_t prevStrX = 0xFFFF;  /* 0xFFFF = "no previous string yet" */
+static uint16_t prevStrY = 0;
+static uint16_t prevStrW = 0;
+static uint16_t prevStrH = 0;
+
 void ILI9341_DrawHollowCircle(uint16_t X, uint16_t Y, uint16_t radius, uint16_t color)
 {
 	int x = radius-1;
@@ -170,6 +183,7 @@ void ILI9341_DrawFilledRectangleCoord(uint16_t X0, uint16_t Y0, uint16_t X1, uin
 
 void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
 {
+
 	if ((ch < 31) || (ch > 127)) return;
 
 	uint16_t fOffset, fWidth, fHeight, fBPL;
@@ -183,7 +197,15 @@ void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, ui
 	tempChar = (uint16_t*)&font[((ch - 0x20) * fOffset) + 4];
 
 	/* Clear background first */
-	ILI9341_DrawRectangle(X, Y, fWidth, fHeight, bgcolor);
+//	if(pWidth > fWidth || pHeight > fHeight)
+//	{
+//
+//	ILI9341_DrawRectangle(pX, pY, pWidth, pHeight, bgcolor);
+//	}
+//
+//	else
+
+	//ILI9341_DrawRectangle(X, Y, fWidth, fHeight, bgcolor);
 
 	for (int j = 0; j < fHeight; j++)
 	{
@@ -197,33 +219,85 @@ void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, ui
 			}
 		}
 	}
+
+//	 pX = X;
+//     pY = Y;
+//     pHeight = fHeight;
+//     pWidth = fWidth;
 }
 void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
 {
 	uint16_t charWidth;			/* Width of character */
 	uint16_t fOffset = font[0];	/* Offset of character */
 	uint16_t fWidth = font[1];	/* Width of font */
+	uint16_t fHeight = font[2];
+	uint16_t startX  = X;
+	uint16_t totalWidth = 0;
+    const char *s;
 
-	while (*str)
+    s=str;
+
+    //measuring the string length
+	while (*s)
 	{
-		ILI9341_DrawChar(*str, font, X, Y, color, bgcolor);
+		 uint16_t *tempChar = (uint16_t*)&font[((*s - 0x20) * fOffset) + 4];
+		        uint16_t charWidth = tempChar[0];
 
-		/* Check character width and calculate proper position */
-		uint16_t *tempChar = (uint16_t*)&font[((*str - 0x20) * fOffset) + 4];
-		charWidth = tempChar[0];
+		        if (charWidth + 2 < fWidth)
+		            totalWidth += (charWidth + 2);
+		        else
+		            totalWidth += fWidth;
 
-		if(charWidth + 2 < fWidth)
-		{
-			/* If character width is smaller than font width */
-			X += (charWidth + 2);
-		}
-		else
-		{
-			X += fWidth;
-		}
-
-		str++;
+		        s++;
 	}
+// if both previous str and current str has same starting and end point
+	if(prevStrX != 0xFFFF  && X == prevStrX && Y == prevStrY && prevStrW > totalWidth)
+	{
+		ILI9341_DrawRectangle(X, Y, prevStrW, prevStrH, bgcolor);
+	}
+
+	//if prev string has smaller starting point than current one
+	else if(prevStrX != 0XFFFF && prevStrX < X && Y == prevStrY && prevStrW > totalWidth)
+	{
+		ILI9341_DrawRectangle(prevStrX, Y, prevStrW, prevStrH, bgcolor);
+	}
+
+	//if prev string has smaller starting point and y is smaller too
+	else if(prevStrX != 0XFFFF && prevStrX < X && Y < prevStrY && prevStrW > totalWidth)
+	{
+		ILI9341_DrawRectangle(prevStrX, prevStrY, prevStrW, prevStrH, bgcolor);
+	}
+	//if only y is smaller than prevY
+	else if(prevStrX != 0XFFFF && prevStrX == X && Y < prevStrY && prevStrW > totalWidth)
+	{
+		ILI9341_DrawRectangle(X, prevStrY, prevStrW, prevStrH, bgcolor);
+	}
+
+	//if nothing has changed
+	else
+	{
+		ILI9341_DrawRectangle(X, Y, totalWidth, fHeight, bgcolor);
+	}
+
+	//draw the string
+    while (*str)
+    {
+        ILI9341_DrawChar(*str, font, X, Y, color, bgcolor);
+
+        uint16_t *tempChar = (uint16_t*)&font[((*str - 0x20) * fOffset) + 4];
+        uint16_t charWidth = tempChar[0];
+
+        if (charWidth + 2 < fWidth)
+            X += (charWidth + 2);
+        else
+            X += fWidth;
+
+        str++;
+    }
+    prevStrX = startX;
+       prevStrY = Y;
+       prevStrW = totalWidth;
+       prevStrH = fHeight;
 }
 
 void ILI9341_DrawImage(const uint8_t* image, uint8_t orientation)

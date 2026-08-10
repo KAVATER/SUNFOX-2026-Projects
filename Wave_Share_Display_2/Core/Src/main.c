@@ -116,9 +116,9 @@ int main(void)
 
 	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
 
-	HAL_Delay(1000);
-
-	ILI9341_DrawImage(myImage,SCREEN_HORIZONTAL_2);
+//	HAL_Delay(1000);
+//
+//	ILI9341_DrawImage(myImage,SCREEN_HORIZONTAL_2);
 
 	//HAL_Delay(500);
 
