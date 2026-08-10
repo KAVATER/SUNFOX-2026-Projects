@@ -27,6 +27,9 @@
 #include "ILI9341_GFX.h"
 #include "snow_tiger.h"
 #include "image_data.h"
+#include "string.h"
+#include "stdio.h"
+#include "GraphInit.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,7 +61,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int16_t adc_val = 255;
 /* USER CODE END 0 */
 
 /**
@@ -98,6 +101,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	ILI9341_Init();
+	Graph_Init();
 
 	ILI9341_SetRotation(SCREEN_HORIZONTAL_2);
 
@@ -105,7 +109,7 @@ int main(void)
 
 	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
 
-	HAL_Delay(1500);
+	HAL_Delay(500);
 
 	ILI9341_DrawImage(myImage,SCREEN_HORIZONTAL_2);
 
@@ -113,12 +117,17 @@ int main(void)
 
 	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
 
-//	ILI9341_SetRotation(SCREEN_HORIZONTAL_2);
-//	ILI9341_FillScreen(BLACK);
-//	HAL_Delay(1000);
-//	ILI9341_FillScreen(GREEN);
-//	HAL_Delay(1000);
-//	ILI9341_FillScreen(WHITE);
+	HAL_Delay(500);
+
+ ILI9341_FillScreen(WHITE);
+
+  ILI9341_DrawHLine(50,120, 220, GREEN);
+
+  HAL_Delay(1000);
+
+  ILI9341_FillScreen(WHITE);
+
+  Graph_Update(adc_val);
 
   while (1)
   {

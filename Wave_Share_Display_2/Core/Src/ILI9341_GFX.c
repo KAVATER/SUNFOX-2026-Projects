@@ -1,5 +1,6 @@
 #include "ILI9341_STM32_Driver.h"
 #include "ILI9341_GFX.h"
+#include "stdio.h"
 
 /* imprecise small delay */
 __STATIC_INLINE void DelayUs(volatile uint32_t us)

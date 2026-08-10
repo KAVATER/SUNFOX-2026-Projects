@@ -1,4 +1,5 @@
 #include "ILI9341_STM32_Driver.h"
+#include "stdlib.h"
 
 volatile uint16_t LCD_HEIGHT = ILI9341_SCREEN_HEIGHT;
 volatile uint16_t LCD_WIDTH	 = ILI9341_SCREEN_WIDTH;
@@ -362,4 +363,32 @@ void ILI9341_DrawVLine(uint16_t x, uint16_t y, uint16_t height, uint16_t color)
 
 	ILI9341_SetAddress(x, y, x, y+height-1);
 	ILI9341_DrawColorBurst(color, height);
+}
+//implementation of Bresenham Line drawing Algorithm for slope greater and less than 1:
+#include <stdlib.h>  // make sure this is at the top
+void ILI9341_DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+{
+    int x = (int)x0;
+    int y = (int)y0;
+    int dx = abs((int)x1 - (int)x0);
+    int dy = abs((int)y1 - (int)y0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx - dy;
+    while (1)
+    {
+        ILI9341_DrawPixel((uint16_t)x, (uint16_t)y, color);
+        if (x == (int)x1 && y == (int)y1) break;
+        int e2 = 2 * err;
+        if (e2 > -dy)
+        {
+            err -= dy;
+            x += sx;
+        }
+        if (e2 < dx)
+        {
+            err += dx;
+            y += sy;
+        }
+    }
 }
