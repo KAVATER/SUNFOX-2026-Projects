@@ -21,6 +21,9 @@ static uint16_t prevStrX = 0xFFFF;  /* 0xFFFF = "no previous string yet" */
 static uint16_t prevStrY = 0;
 static uint16_t prevStrW = 0;
 static uint16_t prevStrH = 0;
+char prevCh;
+uint8_t newStr;
+uint8_t flag =0;
 
 void ILI9341_DrawHollowCircle(uint16_t X, uint16_t Y, uint16_t radius, uint16_t color)
 {
@@ -180,7 +183,7 @@ void ILI9341_DrawFilledRectangleCoord(uint16_t X0, uint16_t Y0, uint16_t X1, uin
 
 	ILI9341_DrawRectangle(X0True, Y0True, xLen, yLen, color);
 }
-
+//uint8_t firstCh = 1;
 void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
 {
 
@@ -206,6 +209,10 @@ void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, ui
 //	else
 
 	//ILI9341_DrawRectangle(X, Y, fWidth, fHeight, bgcolor);
+if(prevCh == ch && newStr == 1)
+	{flag =1;
+	return ;
+	}
 
 	for (int j = 0; j < fHeight; j++)
 	{
@@ -220,10 +227,17 @@ void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, ui
 		}
 	}
 
+
+if(newStr == 1)
+{
+	prevCh =  ch;
+}
 //	 pX = X;
 //     pY = Y;
 //     pHeight = fHeight;
 //     pWidth = fWidth;
+
+
 }
 void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
 {
@@ -234,6 +248,7 @@ void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16
 	uint16_t startX  = X;
 	uint16_t totalWidth = 0;
     const char *s;
+
 
     s=str;
 
@@ -250,7 +265,10 @@ void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16
 
 		        s++;
 	}
-// if both previous str and current str has same starting and end point
+
+	if( flag == 0  )
+	{
+    // if both previous str and current str has same starting and end point
 	if(prevStrX != 0xFFFF  && X == prevStrX && Y == prevStrY && prevStrW > totalWidth)
 	{
 		ILI9341_DrawRectangle(X, Y, prevStrW, prevStrH, bgcolor);
@@ -278,10 +296,14 @@ void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16
 	{
 		ILI9341_DrawRectangle(X, Y, totalWidth, fHeight, bgcolor);
 	}
+}
+	else
+	flag = 0;
 
 	//draw the string
     while (*str)
     {
+
         ILI9341_DrawChar(*str, font, X, Y, color, bgcolor);
 
         uint16_t *tempChar = (uint16_t*)&font[((*str - 0x20) * fOffset) + 4];
@@ -293,11 +315,13 @@ void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16
             X += fWidth;
 
         str++;
+        newStr  = 0;
     }
     prevStrX = startX;
        prevStrY = Y;
        prevStrW = totalWidth;
        prevStrH = fHeight;
+       newStr  = 1;
 }
 
 void ILI9341_DrawImage(const uint8_t* image, uint8_t orientation)
