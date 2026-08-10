@@ -62,22 +62,22 @@ void Graph_Init(void)
     /* Clear graph area */
     ILI9341_DrawFilledRectangleCoord(GRAPH_X0, GRAPH_Y0, GRAPH_X1, GRAPH_Y1, C_BG);
 
-    /* Border */
-    ILI9341_DrawHollowRectangleCoord(GRAPH_X0, GRAPH_Y0, GRAPH_X1, GRAPH_Y1, C_AXIS);
+//    /* Border */
+//    ILI9341_DrawHollowRectangleCoord(GRAPH_X0, GRAPH_Y0, GRAPH_X1, GRAPH_Y1, C_AXIS);
 
     /* Horizontal grid lines (4 lines = 5 divisions) */
-    for (i = 1; i < 5; i++)
-    {
-        uint16_t y = GRAPH_Y0 + (GRAPH_HEIGHT * i) / 5;
-        ILI9341_DrawHLine(GRAPH_X0 + 1, y, GRAPH_WIDTH - 1, C_GRID);
-    }
-
-    /* Vertical grid lines (5 lines = 6 divisions) */
-    for (i = 1; i < 6; i++)
-    {
-        uint16_t x = GRAPH_X0 + (GRAPH_WIDTH * i) / 6;
-        ILI9341_DrawVLine(x, GRAPH_Y0 + 1, GRAPH_HEIGHT - 1, C_GRID);
-    }
+//    for (i = 1; i < 5; i++)
+//    {
+//        uint16_t y = GRAPH_Y0 + (GRAPH_HEIGHT * i) / 5;
+//        ILI9341_DrawHLine(GRAPH_X0 + 1, y, GRAPH_WIDTH - 1, C_GRID);
+//    }
+//
+//    /* Vertical grid lines (5 lines = 6 divisions) */
+//    for (i = 1; i < 6; i++)
+//    {
+//        uint16_t x = GRAPH_X0 + (GRAPH_WIDTH * i) / 6;
+//        ILI9341_DrawVLine(x, GRAPH_Y0 + 1, GRAPH_HEIGHT - 1, C_GRID);
+//    }
 
     /* Y-axis labels */
 //    ILI9341_DrawText("4095", FONT3, 2, GRAPH_Y0, C_TEXT, C_BG);

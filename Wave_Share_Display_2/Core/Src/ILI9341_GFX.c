@@ -226,40 +226,6 @@ void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16
 	}
 }
 
-//void ILI9341_DrawImage(const uint8_t* image, uint8_t orientation)
-//{
-//	if(orientation == SCREEN_HORIZONTAL_1)
-//	{
-//		ILI9341_SetRotation(SCREEN_HORIZONTAL_1);
-//		ILI9341_SetAddress(0,0,ILI9341_SCREEN_WIDTH,ILI9341_SCREEN_HEIGHT);
-//	}
-//	else if(orientation == SCREEN_HORIZONTAL_2)
-//	{
-//		ILI9341_SetRotation(SCREEN_HORIZONTAL_2);
-//		ILI9341_SetAddress(0,0,ILI9341_SCREEN_WIDTH,ILI9341_SCREEN_HEIGHT);
-//	}
-//	else if(orientation == SCREEN_VERTICAL_2)
-//	{
-//		ILI9341_SetRotation(SCREEN_VERTICAL_2);
-//		ILI9341_SetAddress(0,0,ILI9341_SCREEN_HEIGHT,ILI9341_SCREEN_WIDTH);
-//	}
-//	else if(orientation == SCREEN_VERTICAL_1)
-//	{
-//		ILI9341_SetRotation(SCREEN_VERTICAL_1);
-//		ILI9341_SetAddress(0,0,ILI9341_SCREEN_HEIGHT,ILI9341_SCREEN_WIDTH);
-//	}
-//
-//	uint32_t counter = 0;
-//	for(uint32_t i = 0; i < ILI9341_SCREEN_WIDTH*ILI9341_SCREEN_HEIGHT*2/BURST_MAX_SIZE; i++)
-//	{
-//		ILI9341_WriteBuffer((uint8_t*)(image + counter), BURST_MAX_SIZE);
-//		counter += BURST_MAX_SIZE;
-//
-//		/* DMA Tx is too fast, It needs some delay */
-//		DelayUs(1);
-//	}
-//}
-//modified function
 void ILI9341_DrawImage(const uint8_t* image, uint8_t orientation)
 {
     uint16_t w = ILI9341_SCREEN_WIDTH;

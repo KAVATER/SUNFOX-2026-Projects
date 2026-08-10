@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "dma.h"
 #include "spi.h"
 #include "gpio.h"
 
@@ -61,7 +63,10 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int16_t adc_val = 255;
+/* Make adc_val volatile so the main loop sees updates made by DMA/callbacks.
+   Use a 32-bit storage because HAL_ADC_Start_DMA expects a uint32_t* buffer. */
+volatile uint32_t adc_val = 0;
+char adc_text[16];
 /* USER CODE END 0 */
 
 /**
@@ -93,7 +98,9 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SPI1_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -101,7 +108,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	ILI9341_Init();
-	Graph_Init();
+	//Graph_Init();
 
 	ILI9341_SetRotation(SCREEN_HORIZONTAL_2);
 
@@ -109,31 +116,37 @@ int main(void)
 
 	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
 
-	HAL_Delay(500);
+	HAL_Delay(1000);
 
 	ILI9341_DrawImage(myImage,SCREEN_HORIZONTAL_2);
 
-	HAL_Delay(500);
+	//HAL_Delay(500);
 
-	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
+//	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
 
-	HAL_Delay(500);
+//	HAL_Delay(500);
 
- ILI9341_FillScreen(WHITE);
-
-  ILI9341_DrawHLine(50,120, 220, GREEN);
-
-  HAL_Delay(1000);
-
-  ILI9341_FillScreen(WHITE);
-
-  Graph_Update(adc_val);
+// ILI9341_FillScreen(WHITE);
+//
+//  ILI9341_DrawHLine(50,120, 220, GREEN);
+//
+//  HAL_Delay(1000);
+//
+//  ILI9341_FillScreen(WHITE);
+//
+//  Graph_Update(adc_val);
 
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+	    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_val, 1);
+
+		snprintf(adc_text, sizeof(adc_text), "%lu", (unsigned long)adc_val);
+		ILI9341_DrawText(adc_text, FONT3, 100, 85, BLUE, WHITE);
+		HAL_Delay(500);
   }
   /* USER CODE END 3 */
 }
