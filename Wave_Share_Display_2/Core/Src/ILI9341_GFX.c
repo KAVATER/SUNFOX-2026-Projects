@@ -17,13 +17,24 @@ __STATIC_INLINE void DelayUs(volatile uint32_t us)
 //uint16_t pWidth = 0;
 
 /* For tracking previous string dimension */
-static uint16_t prevStrX = 0xFFFF;  /* 0xFFFF = "no previous string yet" */
-static uint16_t prevStrY = 0;
-static uint16_t prevStrW = 0;
-static uint16_t prevStrH = 0;
+//static uint16_t prevStrX = 0xFFFF;  /* 0xFFFF = "no previous string yet" */
+//static uint16_t prevStrY = 0;
+//static uint16_t prevStrW = 0;
+//static uint16_t prevStrH = 0;
 char prevCh;
 uint8_t newStr;
 uint8_t flag =0;
+#define MAX_TRACKED_STR_LEN 24
+
+static struct {
+	uint16_t x,y;
+	uint16_t width;
+	uint16_t height;
+	char text[MAX_TRACKED_STR_LEN];
+	uint16_t charWidths[MAX_TRACKED_STR_LEN];
+	uint8_t len;
+	uint8_t valid;
+}prevStringState = {0};
 
 void ILI9341_DrawHollowCircle(uint16_t X, uint16_t Y, uint16_t radius, uint16_t color)
 {
@@ -183,6 +194,17 @@ void ILI9341_DrawFilledRectangleCoord(uint16_t X0, uint16_t Y0, uint16_t X1, uin
 
 	ILI9341_DrawRectangle(X0True, Y0True, xLen, yLen, color);
 }
+//width of one character in pixels
+static uint16_t ILI9341_GetCharWidth(char ch , const uint16_t font[])
+{
+    uint16_t fOffset = font[0];
+    uint16_t fWidth  = font[1];
+
+  if(ch < 32 || ch > 127)return fWidth;
+  uint16_t *tempChar = (uint16_t*)&font[((ch - 0x20) * fOffset) + 4];
+  uint16_t charWidth = tempChar[0];
+  return (charWidth + 2 < fWidth)? (charWidth + 2) : fWidth;
+}
 //uint8_t firstCh = 1;
 void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
 {
@@ -209,10 +231,11 @@ void ILI9341_DrawChar(char ch, const uint16_t font[], uint16_t X, uint16_t Y, ui
 //	else
 
 	//ILI9341_DrawRectangle(X, Y, fWidth, fHeight, bgcolor);
-if(prevCh == ch && newStr == 1)
-	{flag =1;
-	return ;
-	}
+
+//if(prevCh == ch && newStr == 1)
+//	{flag =1;
+//	return ;
+//	}
 
 	for (int j = 0; j < fHeight; j++)
 	{
@@ -227,103 +250,155 @@ if(prevCh == ch && newStr == 1)
 		}
 	}
 
-
-if(newStr == 1)
+}
+void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16_t Y,
+                      uint16_t color, uint16_t bgcolor)
 {
-	prevCh =  ch;
-}
-//	 pX = X;
-//     pY = Y;
-//     pHeight = fHeight;
-//     pWidth = fWidth;
+    // ─────────────────────────────────────────────────────────────
+    // EXTRACT FONT METADATA from font lookup table
+    // ─────────────────────────────────────────────────────────────
+    uint16_t fOffset = font[0];   // ASCII offset (e.g., 32 for space)
+    uint16_t fWidth  = font[1];   // Default/max character width (fixed-width fallback)
+    uint16_t fHeight = font[2];   // Font height in pixels (all chars same height)
 
+    const char *s;                // String pointer for iteration
+    uint16_t currentX = X;        // Running X position while drawing chars
+    uint16_t newLen   = 0;        // Character count of new string
+    uint16_t newWidth = 0; // Total pixel width of new string (static persists across calls)
+    uint16_t i = 0;               // Index for char arrays
 
-}
-void ILI9341_DrawText(const char* str, const uint16_t font[], uint16_t X, uint16_t Y, uint16_t color, uint16_t bgcolor)
-{
-	uint16_t charWidth;			/* Width of character */
-	uint16_t fOffset = font[0];	/* Offset of character */
-	uint16_t fWidth = font[1];	/* Width of font */
-	uint16_t fHeight = font[2];
-	uint16_t startX  = X;
-	uint16_t totalWidth = 0;
-    const char *s;
-
-
-    s=str;
-
-    //measuring the string length
-	while (*s)
-	{
-		 uint16_t *tempChar = (uint16_t*)&font[((*s - 0x20) * fOffset) + 4];
-		        uint16_t charWidth = tempChar[0];
-
-		        if (charWidth + 2 < fWidth)
-		            totalWidth += (charWidth + 2);
-		        else
-		            totalWidth += fWidth;
-
-		        s++;
-	}
-
-	if( flag == 0  )
-	{
-    // if both previous str and current str has same starting and end point
-	if(prevStrX != 0xFFFF  && X == prevStrX && Y == prevStrY && prevStrW > totalWidth)
-	{
-		ILI9341_DrawRectangle(X, Y, prevStrW, prevStrH, bgcolor);
-	}
-
-	//if prev string has smaller starting point than current one
-	else if(prevStrX != 0XFFFF && prevStrX < X && Y == prevStrY && prevStrW > totalWidth)
-	{
-		ILI9341_DrawRectangle(prevStrX, Y, prevStrW, prevStrH, bgcolor);
-	}
-
-	//if prev string has smaller starting point and y is smaller too
-	else if(prevStrX != 0XFFFF && prevStrX < X && Y < prevStrY && prevStrW > totalWidth)
-	{
-		ILI9341_DrawRectangle(prevStrX, prevStrY, prevStrW, prevStrH, bgcolor);
-	}
-	//if only y is smaller than prevY
-	else if(prevStrX != 0XFFFF && prevStrX == X && Y < prevStrY && prevStrW > totalWidth)
-	{
-		ILI9341_DrawRectangle(X, prevStrY, prevStrW, prevStrH, bgcolor);
-	}
-
-	//if nothing has changed
-	else
-	{
-		ILI9341_DrawRectangle(X, Y, totalWidth, fHeight, bgcolor);
-	}
-}
-	else
-	flag = 0;
-
-	//draw the string
-    while (*str)
+    // ─────────────────────────────────────────────────────────────
+    // PASS 1: Measure the new string (width + length)
+    // We need total pixel width BEFORE drawing to handle background clearing
+    // ─────────────────────────────────────────────────────────────
+    s = str;
+    while(*s && newLen < MAX_TRACKED_STR_LEN - 1)
     {
-
-        ILI9341_DrawChar(*str, font, X, Y, color, bgcolor);
-
-        uint16_t *tempChar = (uint16_t*)&font[((*str - 0x20) * fOffset) + 4];
-        uint16_t charWidth = tempChar[0];
-
-        if (charWidth + 2 < fWidth)
-            X += (charWidth + 2);
-        else
-            X += fWidth;
-
-        str++;
-        newStr  = 0;
+        newWidth += ILI9341_GetCharWidth(*s, font);  // Sum each char's pixel width
+        newLen++;                                     // Count characters
+        s++;
     }
-    prevStrX = startX;
-       prevStrY = Y;
-       prevStrW = totalWidth;
-       prevStrH = fHeight;
-       newStr  = 1;
-}
 
+    // ─────────────────────────────────────────────────────────────
+    // CHECK: Are we drawing in the SAME text field as last call?
+    // Same field = same X, Y, and font height → we can optimize redraws
+    // ─────────────────────────────────────────────────────────────
+    uint8_t sameField = (prevStringState.valid &&      // Previous state exists?
+                         prevStringState.x == X &&      // Same horizontal position?
+                         prevStringState.y == Y &&      // Same vertical position?
+                         prevStringState.height == fHeight);  // Same font?
+
+    // ─────────────────────────────────────────────────────────────
+    // BACKGROUND CLEARING STRATEGY
+    // ─────────────────────────────────────────────────────────────
+    if(sameField  && prevStringState.width > newWidth )//&& newLen < prevStringState.len
+    {
+        // ── SAME FIELD: Smart partial clear ─────────────────────
+        // Only clear what changed — avoids flickering entire field
+
+
+            // New string is SHORTER in character count
+            // Check if it's also narrower in pixels (proportional fonts!)
+
+                // Old string stuck out farther to the right.
+                // Erase just the "tail" — the pixels from new end to old end.
+                // X + newWidth  = where new string ends
+                // prev - new    = how many pixels of old string remain visible
+                ILI9341_DrawRectangle( X +newWidth , Y,
+                                      prevStringState.width - newWidth,
+                                      fHeight, bgcolor);
+
+        }
+        else if(sameField && newWidth > prevStringState.width )// && newLen > prevStringState.len
+        {
+
+//        	   ILI9341_DrawRectangle(X - prevStringState.width, Y,
+//        	                             newWidth - prevStringState.width,
+//        	                             fHeight, bgcolor);
+
+
+        }
+        // Note: If new string is same length or longer, we don't clear here.
+        // Individual char logic below handles per-character clearing.
+
+    else if(!sameField)
+    {
+        // ── DIFFERENT FIELD: Full clear required ────────────────
+
+        // 1) Clear the PREVIOUS field (if any) — it's now stale
+        if(prevStringState.valid)
+        {
+            ILI9341_DrawRectangle(prevStringState.x, prevStringState.y,
+                                  prevStringState.width,
+                                  prevStringState.height, bgcolor);
+        }
+
+        // 2) Clear the NEW field before drawing — we're starting fresh
+        ILI9341_DrawRectangle(X, Y, newWidth, fHeight, bgcolor);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // PASS 2: Draw the string character by character
+    // ─────────────────────────────────────────────────────────────
+    s = str;          // Reset pointer to start of string
+    i = 0;            // Reset index
+
+    while(*s && i < MAX_TRACKED_STR_LEN - 1)
+    {
+        uint16_t charW = ILI9341_GetCharWidth(*s, font);  // This char's pixel width
+        uint8_t  needsRedraw = 1;                          // Assume we need to draw
+
+        // ── Optimization: Skip unchanged characters ─────────────
+        // If same field AND this position existed before AND char is identical,
+        // don't redraw — prevents flicker and saves SPI bandwidth
+        if(sameField && i < prevStringState.len)
+        {
+            if(prevStringState.text[i] == *s)
+            {
+                needsRedraw = 0;  // Char unchanged, skip drawing
+            }
+        }
+
+        if(needsRedraw)
+        {
+            // ── Determine how much background to clear for this char ─
+            // Must cover the LARGER of: new char width or old char width
+            // (Old char might have been wider, leaving pixels behind)
+            uint16_t clearW = charW;
+            if(sameField && i < prevStringState.len)
+            {
+                if(prevStringState.charWidths[i] > clearW)
+                    clearW = prevStringState.charWidths[i];  // Use wider of the two
+            }
+
+            // Clear background for this character position
+            ILI9341_DrawRectangle(currentX, Y, clearW, fHeight, bgcolor);
+
+            // Draw the actual character bitmap
+            ILI9341_DrawChar(*s, font, currentX, Y, color, bgcolor);
+        }
+
+        // ── Save state for next frame's comparison ──────────────
+        prevStringState.text[i]       = *s;      // Remember what char we drew
+        prevStringState.charWidths[i] = charW;   // Remember how wide it was
+
+        // Advance to next character position
+        currentX += charW;   // Move X by this char's actual width (proportional font)
+        s++;                  // Next character in string
+        i++;                  // Next index in state arrays
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // SAVE GLOBAL STATE for next call
+    // ─────────────────────────────────────────────────────────────
+    prevStringState.text[i] = '\0';    // Null-terminate stored string
+    prevStringState.x       = X;        // Remember where we drew
+    prevStringState.y       = Y;
+    prevStringState.height  = fHeight;  // Remember font height
+    prevStringState.width   = newWidth; // Remember total pixel width
+    prevStringState.len     = i;        // Remember character count
+    prevStringState.valid   = 1;        // Mark state as valid for next time
+}
 void ILI9341_DrawImage(const uint8_t* image, uint8_t orientation)
 {
     uint16_t w = ILI9341_SCREEN_WIDTH;
