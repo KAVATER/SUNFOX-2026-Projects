@@ -16,10 +16,10 @@
 /* -------------------------------------------------------------------------- */
 /*  DISPLAY & GRAPH CONFIGURATION (320 x 240 Horizontal)                     */
 /* -------------------------------------------------------------------------- */
-#define GRAPH_X0        40      /* Left margin for Y labels */
-#define GRAPH_Y0        15      /* Top margin for title */
-#define GRAPH_WIDTH     270     /* 320 - 40 - 10 right padding */
-#define GRAPH_HEIGHT    195     /* 240 - 15 - 30 bottom */
+#define GRAPH_X0        0      /* Left margin for Y labels */
+#define GRAPH_Y0        0      /* Top margin for title */
+#define GRAPH_WIDTH     320    /* 320 - 40 - 10 right padding */
+#define GRAPH_HEIGHT    240     /* 240 - 15 - 30 bottom */
 
 #define GRAPH_X1        (GRAPH_X0 + GRAPH_WIDTH)
 #define GRAPH_Y1        (GRAPH_Y0 + GRAPH_HEIGHT)
@@ -154,13 +154,21 @@ void Graph_Update(uint16_t adc_val)
     /* ---------------------------------------------------------------------- */
     /*  OVERWRITE OLD ADC VALUE TEXT (prevent ghosting)                       */
     /* ---------------------------------------------------------------------- */
-    char val_str[16];
-    snprintf(val_str, sizeof(val_str), "ADC:%4d", adc_val);
+//    char val_str[16];
+//    snprintf(val_str, sizeof(val_str), "ADC:%4d", adc_val);
 
-    ILI9341_DrawFilledRectangleCoord(GRAPH_X1 - 70, GRAPH_Y0 + 2,
-                                       GRAPH_X1 - 2, GRAPH_Y0 + 14, C_BG);
+//    ILI9341_DrawFilledRectangleCoord(GRAPH_X1 - 70, GRAPH_Y0 + 2,
+//                                       GRAPH_X1 - 2, GRAPH_Y0 + 14, C_BG);
+
+    ILI9341_DrawFilledRectangleCoord(GRAPH_X0 , GRAPH_Y0,
+                                       GRAPH_X1, GRAPH_Y1, C_BG);
+
     //ILI9341_DrawText(val_str, FONT3, GRAPH_X1 - 70, GRAPH_Y0 + 2, C_TEXT, C_BG);
 
     /* Advance circular buffer */
     write_idx = (write_idx + 1) % NUM_POINTS;
 }
+//void Graph_Update(uint16_t adc_val)
+//{
+//
+//}

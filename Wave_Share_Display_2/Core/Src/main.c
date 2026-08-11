@@ -97,44 +97,55 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
+
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SPI1_Init();
   MX_ADC1_Init();
+
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
 	ILI9341_Init();
+
 	//Graph_Init();
 
 	ILI9341_SetRotation(SCREEN_HORIZONTAL_2);
 
-	ILI9341_FillScreen(WHITE);
-
-	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
-
-	HAL_Delay(500);
-//
-//	ILI9341_DrawImage(myImage,SCREEN_HORIZONTAL_2);
-
-	//HAL_Delay(500);
+	//ILI9341_FillScreen(WHITE);
 
 //	ILI9341_DrawText("SUNFOX", FONT3, 60, 85, BLUE, WHITE);
-
+//
 //	HAL_Delay(500);
+//
+//	ILI9341_FillScreen(WHITE);
 
-// ILI9341_FillScreen(WHITE);
+//#if IMAGE_1_ENABLE
+//	ILI9341_DrawImage(image_1,SCREEN_HORIZONTAL_2);
+//#endif
+
+//#if image2_ENABLE
+//	ILI9341_DrawImage(Background, SCREEN_HORIZONTAL_2);
+//#endif
+
+#if image3_ENABLE
+	ILI9341_DrawImage(Background,SCREEN_HORIZONTAL_2);
+#endif
+
+
+/* Graph Testing */
 //
 //  ILI9341_DrawHLine(50,120, 220, GREEN);
 //
-//  HAL_Delay(1000);
-//
-//  ILI9341_FillScreen(WHITE);
-//
-//  Graph_Update(adc_val);
+  HAL_Delay(1250);
+
+  ILI9341_FillScreen(WHITE);
+
+
 
   while (1)
   {
@@ -144,9 +155,13 @@ int main(void)
 
 	    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_val, 1);
 
-		snprintf(adc_text, sizeof(adc_text), "%lu", (unsigned long)adc_val);
-		ILI9341_DrawText(adc_text, FONT3, 100, 85, BLUE, WHITE);
-		HAL_Delay(500);
+	    Graph_Update(adc_val);
+
+     //	HAL_Delay(10);
+
+//
+//		snprintf(adc_text, sizeof(adc_text), "%lu", (unsigned long)adc_val);
+//		ILI9341_DrawText(adc_text, FONT3, 100, 85, BLUE, WHITE);
   }
   /* USER CODE END 3 */
 }

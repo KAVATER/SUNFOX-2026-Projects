@@ -756,3 +756,111 @@ void ILI9341_DrawImage(const uint8_t* image, uint8_t orientation)
         DelayUs(1);
     }
 }
+
+#include "GraphInit.h"
+#include "ILI9341_GFX.h"
+#include "fonts.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <ILI9341_STM32_Driver.h>
+/* -------------------------------------------------------------------------- */
+/*  DISPLAY & GRAPH CONFIGURATION (320 x 240 Horizontal)                     */
+/* -------------------------------------------------------------------------- */
+#define GRAPH_X0        40      /* Left margin for Y labels */
+#define GRAPH_Y0        15      /* Top margin for title */
+#define GRAPH_WIDTH     270     /* 320 - 40 - 10 right padding */
+#define GRAPH_HEIGHT    195     /* 240 - 15 - 30 bottom */
+
+#define GRAPH_X1        (GRAPH_X0 + GRAPH_WIDTH)
+#define GRAPH_Y1        (GRAPH_Y0 + GRAPH_HEIGHT)
+
+#define ADC_MAX         4095    /* 12-bit ADC */
+#define NUM_POINTS      GRAPH_WIDTH
+
+/* Colors */
+#define C_BG            BLACK
+#define C_GRID          0x4208  /* Dark grey */
+#define C_AXIS          WHITE
+#define C_GRAPH         GREEN
+#define C_TEXT          YELLOW
+
+/* -------------------------------------------------------------------------- */
+/*  CIRCULAR BUFFER                                                            */
+/* -------------------------------------------------------------------------- */
+static uint16_t y_buffer[NUM_POINTS];
+static uint16_t write_idx = 0;
+static uint8_t  init_done = 0;
+
+/* -------------------------------------------------------------------------- */
+/*  MAP ADC → SCREEN Y (ADC=0 at bottom, ADC=4095 at top)                      */
+/* -------------------------------------------------------------------------- */
+static uint16_t adc_to_y(uint16_t adc)
+{
+    if (adc > ADC_MAX) adc = ADC_MAX;
+    uint32_t scaled = ((uint32_t)adc * (GRAPH_HEIGHT - 1)) / ADC_MAX;
+    return (GRAPH_Y1 - 1) - (uint16_t)scaled;
+}
+
+
+/* ============================================================================
+ *  Graph_Update — Call with each new ADC value                                *
+ *  Draws scrolling waveform: new point enters at RIGHT, old points shift LEFT *
+ * ============================================================================ */
+void Graph_Update(uint16_t adc_val)
+{
+    uint16_t i;
+    uint16_t prev_x, prev_y;
+    uint8_t first;
+
+    if (!init_done) Graph_Init();
+
+    /* Store new point in circular buffer */
+    y_buffer[write_idx] = adc_to_y(adc_val);
+
+    /* ---------------------------------------------------------------------- */
+    /*  REDRAW ENTIRE TRACE                                                   */
+    /*  Rightmost pixel (GRAPH_X1) = newest sample                            */
+    /*  Leftmost pixel (GRAPH_X0)  = oldest sample                            */
+    /* ---------------------------------------------------------------------- */
+
+    first = 1;
+
+    for (i = 0; i < NUM_POINTS; i++)
+    {
+        /* Read buffer: newest first */
+        uint16_t buf_idx = (write_idx + NUM_POINTS - i) % NUM_POINTS;
+        uint16_t x = GRAPH_X1 - i;      /* Right to left */
+        uint16_t y = y_buffer[buf_idx];
+
+        if (x < GRAPH_X0) break;        /* Off left edge */
+
+        if (first)
+        {
+            ILI9341_DrawPixel(x, y, C_GRAPH);   /* Rightmost point only */
+            first = 0;
+        }
+        else
+        {
+            /* Connect previous point to current with a line */
+            ILI9341_DrawLine(prev_x, prev_y, x, y, C_GRAPH);
+        }
+
+        prev_x = x;
+        prev_y = y;
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /*  OVERWRITE OLD ADC VALUE TEXT (prevent ghosting)                       */
+    /* ---------------------------------------------------------------------- */
+    char val_str[16];
+    snprintf(val_str, sizeof(val_str), "ADC:%4d", adc_val);
+
+    ILI9341_DrawFilledRectangleCoord(GRAPH_X1 - 70, GRAPH_Y0 + 2,
+                                       GRAPH_X1 - 2, GRAPH_Y0 + 14, C_BG);
+    //ILI9341_DrawText(val_str, FONT3, GRAPH_X1 - 70, GRAPH_Y0 + 2, C_TEXT, C_BG);
+
+    /* Advance circular buffer */
+    write_idx = (write_idx + 1) % NUM_POINTS;
+}
