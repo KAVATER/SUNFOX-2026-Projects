@@ -13,16 +13,16 @@
 /* -------------------------------------------------------------------------- */
 /*  DISPLAY & GRAPH CONFIGURATION (320 x 240 Horizontal)                     */
 /* -------------------------------------------------------------------------- */
-#define GRAPH_X0        40      /* Left margin for Y labels */
-#define GRAPH_Y0        15      /* Top margin for title */
-#define GRAPH_WIDTH     270     /* 320 - 40 - 10 right padding */
-#define GRAPH_HEIGHT    195     /* 240 - 15 - 30 bottom */
-
-#define GRAPH_X1        (GRAPH_X0 + GRAPH_WIDTH)
-#define GRAPH_Y1        (GRAPH_Y0 + GRAPH_HEIGHT)
-
-#define ADC_MAX         4095    /* 12-bit ADC */
-#define NUM_POINTS      GRAPH_WIDTH
+//#define GRAPH_X0        0     /* Left margin for Y labels */
+//#define GRAPH_Y0        0      /* Top margin for title */
+//#define GRAPH_WIDTH     320     /* 320 - 40 - 10 right padding */
+//#define GRAPH_HEIGHT    180     /* 240 - 15 - 30 bottom */
+//
+//#define GRAPH_X1        (GRAPH_X0 + GRAPH_WIDTH)
+//#define GRAPH_Y1        (GRAPH_Y0 + GRAPH_HEIGHT)
+//
+//#define ADC_MAX         5120    /* 12-bit ADC */
+//#define NUM_POINTS      GRAPH_WIDTH
 
 /* Colors */
 #define C_BG            BLACK
@@ -32,7 +32,9 @@
 #define C_TEXT          YELLOW
 
 void Graph_Init(void);
-void Graph_Update(uint16_t adc_val);
+void Graph_Update(int16_t adc_val);
+void Graph_Init2(void);
+void Graph_Update2(int16_t adc_val);
 //void graph_push(uint16_t adc_val);
 
 

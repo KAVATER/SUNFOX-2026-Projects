@@ -1,10 +1,3 @@
-/*
- * GraphInit.c
- *
- *  Ring-buffer oscilloscope with connected trace (line graph)
- *  Newest data enters from the left, pen moves right, wraps to left edge.
- *  Only ONE vertical column is cleared per ADC sample — zero flicker.
- */
 
 #include "GraphInit.h"
 #include "ILI9341_GFX.h"
@@ -15,18 +8,32 @@
 #include <stdint.h>
 #include "ILI9341_STM32_Driver.h"
 
-/* -------------------------------------------------------------------------- */
-/*  DISPLAY & GRAPH CONFIGURATION                                             */
-/* -------------------------------------------------------------------------- */
 #define GRAPH_X0        0
 #define GRAPH_Y0        0
 #define GRAPH_WIDTH     320
-#define GRAPH_HEIGHT    240
+#define GRAPH_HEIGHT    110
 #define GRAPH_X1        (GRAPH_X0 + GRAPH_WIDTH  - 1)
 #define GRAPH_Y1        (GRAPH_Y0 + GRAPH_HEIGHT - 1)
 
-#define ADC_MAX         4095
+//graph 2
+#define GRAPH_X2_0        0
+#define GRAPH_Y2_0        0
+#define GRAPH_WIDTH2     320
+#define GRAPH_HEIGHT2    240
+#define GRAPH_X2_1        (GRAPH_X2_0 + GRAPH_WIDTH2  - 1)
+#define GRAPH_Y2_1        (GRAPH_Y2_0 + GRAPH_HEIGHT2 - 1)
+
+//#define ADC_MAX         4095
+#define ADC_MAX           4500
+//#define ADC_MAX           5120 //25% zoomed out
+//#define ADC_MAX           6142 //50% zoomed out
+
+//#define ADC_MAX2            6142
+//#define   ADC_MAX2            7166 //75% zoomed out
+#define ADC_MAX2           8120 //100% zoomed
+
 #define NUM_POINTS      GRAPH_WIDTH
+#define NUM_POINTS2      GRAPH_WIDTH2
 
 /* Colors */
 #define C_BG            BLACK
@@ -42,14 +49,26 @@ static uint16_t adc_buffer[NUM_POINTS];
 static uint16_t write_idx = 0;
 static uint8_t  init_done = 0;
 
+//second ciruclar buffer
+static uint16_t adc_buffer2[NUM_POINTS2];
+static uint16_t write_idx2 = 0;
+static uint8_t  init_done2 = 0;
 /* -------------------------------------------------------------------------- */
 /*  MAP ADC (0..4095) -> SCREEN Y (bottom..top)                               */
 /* -------------------------------------------------------------------------- */
 static uint16_t adc_to_y(uint16_t adc)
 {
     if (adc > ADC_MAX) adc = ADC_MAX;
-    uint32_t scaled = ((uint32_t)adc * (GRAPH_HEIGHT - 1)) / ADC_MAX;
-    return GRAPH_Y1 - (uint16_t)scaled;
+    uint32_t scaled2 = ((uint32_t)adc * (GRAPH_HEIGHT - 1)) / ADC_MAX;
+    return GRAPH_Y1 - (uint16_t)scaled2;
+}
+
+//second adc to y mapping
+static uint16_t adc_to_y2(uint16_t adc)
+{
+    if (adc > ADC_MAX2) adc = ADC_MAX2;
+    uint32_t scaled2 = ((uint32_t)adc * (GRAPH_HEIGHT2 - 1)) / ADC_MAX2;
+    return GRAPH_Y2_1 - (uint16_t)scaled2;
 }
 
 /* ========================================================================== */
@@ -62,24 +81,27 @@ void Graph_Init(void)
     /* Clear graph area once */
     ILI9341_DrawFilledRectangleCoord(GRAPH_X0, GRAPH_Y0, GRAPH_X1, GRAPH_Y1, C_BG);
 
-    /* Optional: draw static grid (done once, never touched again) */
-    /*
-    for (i = 1; i < 5; i++) {
-        uint16_t y = GRAPH_Y0 + (GRAPH_HEIGHT * i) / 5;
-        ILI9341_DrawHLine(GRAPH_X0, y, GRAPH_WIDTH, C_GRID);
-    }
-    for (i = 1; i < 6; i++) {
-        uint16_t x = GRAPH_X0 + (GRAPH_WIDTH * i) / 6;
-        ILI9341_DrawVLine(x, GRAPH_Y0, GRAPH_HEIGHT, C_GRID);
-    }
-    */
-
     /* Start with flat line at bottom */
     for (i = 0; i < NUM_POINTS; i++)
         adc_buffer[i] = 0;
 
     write_idx = 0;
     init_done = 1;
+}
+
+void Graph_Init2(void)
+{
+    uint16_t i;
+
+    /* Clear graph area once */
+    ILI9341_DrawFilledRectangleCoord(GRAPH_X2_0, GRAPH_Y2_0, GRAPH_X2_1, GRAPH_Y2_1, C_BG);
+
+    /* Start with flat line at bottom */
+    for (i = 0; i < NUM_POINTS2; i++)
+        adc_buffer2[i] = 0;
+
+    write_idx2 = 0;
+    init_done2 = 1;
 }
 
 /* ========================================================================== */
@@ -91,7 +113,7 @@ void Graph_Init(void)
 /*    - One line segment connects to the previous point                       */
 /*    - At wrap-around (x=0), no line is drawn across the screen               */
 /* ========================================================================== */
-void Graph_Update(uint16_t adc_val)
+void Graph_Update(int16_t adc_val)
 {
     uint16_t x, y_new;
     uint16_t prev_idx, prev_x, prev_y;
@@ -128,4 +150,44 @@ void Graph_Update(uint16_t adc_val)
 
     /* --- 5. Advance pen ---------------------------------------------------- */
     write_idx = (write_idx + 1) % NUM_POINTS;
+}
+
+//for graph 2
+void Graph_Update2(int16_t adc_val)
+{
+    uint16_t x2, y_new2;
+    uint16_t prev_idx2, prev_x2, prev_y2;
+
+    if (!init_done) Graph_Init2();
+
+    /* --- 1. Screen position for this sample -------------------------------- */
+    x2     = GRAPH_X2_0 + write_idx2;
+    y_new2 = adc_to_y2(adc_val);
+
+    /* --- 2. Clear ONLY the 1-pixel-wide column being overwritten ----------- */
+    /* This removes the old trace from the previous wrap-around.               */
+    ILI9341_DrawLine(x2, GRAPH_Y2_0, x2, GRAPH_Y2_1, C_BG);
+
+    /* --- 3. Store new value in ring buffer --------------------------------- */
+    adc_buffer2[write_idx2] = adc_val;
+
+    /* --- 4. Connect to previous point with a line -------------------------- */
+    prev_idx2 = (write_idx2 == 0) ? (NUM_POINTS2 - 1) : (write_idx2 - 1);
+    prev_x2   = GRAPH_X2_0 + prev_idx2;
+    prev_y2   = adc_to_y2(adc_buffer2[prev_idx2]);
+
+    /* Draw line only if previous point is physically adjacent on screen.    */
+    /* At wrap-around (write_idx == 0) prev_x is at far right — skip line.   */
+    if (prev_x2 == x2 - 1)
+    {
+        ILI9341_DrawLine(prev_x2, prev_y2, x2, y_new2, C_GRAPH);
+    }
+    else
+    {
+        /* Wrap or first sample: draw just the dot */
+        ILI9341_DrawPixel(x2, y_new2, C_GRAPH);
+    }
+
+    /* --- 5. Advance pen ---------------------------------------------------- */
+    write_idx2 = (write_idx2 + 1) % NUM_POINTS2;
 }
