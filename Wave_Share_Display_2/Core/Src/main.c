@@ -156,6 +156,7 @@ int main(void)
 	    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_val, 1);
 
 	    Graph_Update(adc_val);
+	   // graph_push(adc_val);
 
      //	HAL_Delay(10);
 

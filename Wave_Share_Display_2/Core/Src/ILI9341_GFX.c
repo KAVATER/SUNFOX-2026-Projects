@@ -407,7 +407,7 @@ void ILI9341_DrawImage(const uint8_t* image, uint8_t orientation)
     if(orientation == SCREEN_HORIZONTAL_1 || orientation == SCREEN_HORIZONTAL_2)
     {
         ILI9341_SetRotation(orientation);
-        ILI9341_SetAddress(0, 0, w - 1, h - 1);  // Inclusive coordinates!
+        ILI9341_SetAddress(	0, 0, w - 1, h - 1);  // Inclusive coordinates!
     }
     else
     {
@@ -426,7 +426,7 @@ void ILI9341_DrawImage(const uint8_t* image, uint8_t orientation)
 
         // Ensure we never split a 16-bit pixel across bursts!
         if((chunk % 2) != 0)
-            chunk--;  // Make it even
+            chunk--;  //Make it even
 
         ILI9341_WriteBuffer((uint8_t*)(image + counter), chunk);
         counter += chunk;

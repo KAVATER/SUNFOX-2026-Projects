@@ -33,5 +33,7 @@
 
 void Graph_Init(void);
 void Graph_Update(uint16_t adc_val);
+//void graph_push(uint16_t adc_val);
+
 
 #endif /* SRC_GRAPHINIT_H_ */
