@@ -71,7 +71,7 @@ void Error_Handler(void);
 #define LCD_DIN_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
-
+#define Num_adc_channel 2
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

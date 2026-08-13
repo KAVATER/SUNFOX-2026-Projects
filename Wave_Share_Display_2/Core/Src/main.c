@@ -21,6 +21,7 @@
 #include "adc.h"
 #include "dma.h"
 #include "spi.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -52,7 +53,22 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+int _write(int fd, char *ptr, int len)
+{
+	HAL_StatusTypeDef hstatus;
+	if(fd==1 || fd==2)
+	{
+		hstatus =  HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, HAL_MAX_DELAY);
+		  return len;
 
+		  if(hstatus == HAL_OK)
+		  return len;
+
+		  else
+			  return -1;
+	}
+	return -1;
+}
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,16 +81,31 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 /* Make adc_val volatile so the main loop sees updates made by DMA/callbacks.
    Use a 32-bit storage because HAL_ADC_Start_DMA expects a uint32_t* buffer. */
+#define Num_adc_channel 2
+
 volatile uint32_t adc_val = 0;
 char adc_text[16];
+ volatile uint8_t count = 0;
+uint8_t count_limit = 2;
+volatile uint32_t adc_val2 = 0;
+uint16_t adc_buffer_dma[Num_adc_channel];
+uint16_t adc_buffer_dma2[Num_adc_channel];
+uint8_t adc_data_ready = 0;
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+    if (hadc->Instance == ADC1)
+    {
+        adc_buffer_dma2[0] = adc_buffer_dma[0];
+        adc_buffer_dma2[1] = adc_buffer_dma[1];
+        adc_data_ready = 1;
+    }
+}
 /* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
-uint8_t count = 0;
-uint8_t count_limit = 8;
 int main(void)
 {
 
@@ -103,6 +134,7 @@ int main(void)
   MX_DMA_Init();
   MX_SPI1_Init();
   MX_ADC1_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -146,7 +178,7 @@ int main(void)
   ILI9341_FillScreen(BLACK);
 
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
 
 
   while (1)
@@ -162,9 +194,14 @@ int main(void)
 
 	    //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0,GPIO_PIN_SET);
 
-if(count == count_limit)
+if(count >= count_limit &&  adc_data_ready)
 {
-	    Graph_Update(adc_val);
+//	    Graph_Update(adc_val);
+//	    Graph_Update2(adc_val2);
+	Graph_Update(adc_buffer_dma2[0]);
+	Graph_Update2(adc_buffer_dma2[1]);
+	printf("%d , %d\r\n",adc_buffer_dma2[0],adc_buffer_dma2[1]);
+	//printf("%d\r\n",adc_buffer_dma2[1]);
 	    count = 0;
 }
 	   // Graph_Update2(adc_val);

@@ -56,6 +56,9 @@
 /* USER CODE BEGIN 0 */
 extern volatile uint32_t adc_val;
 extern uint8_t count;
+extern volatile uint32_t adc_val2;
+extern uint16_t adc_buffer_dma[Num_adc_channel];
+extern uint16_t adc_buffer_dma2[Num_adc_channel];
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -192,8 +195,16 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_val, 1);
-   count++;
+ // HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_val, 1);
+
+   //HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&adc_val2,1);
+
+  HAL_ADC_Start_DMA(&hadc1,(uint32_t*)adc_buffer_dma,Num_adc_channel );
+//  adc_buffer_dma2[0] = adc_buffer_dma[0];
+//  adc_buffer_dma2[1] = adc_buffer_dma[1];
+
+  count++;
+   HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
   /* USER CODE END SysTick_IRQn 1 */
 }
 

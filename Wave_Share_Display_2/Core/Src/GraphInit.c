@@ -27,12 +27,12 @@
 //#define ADC_MAX           4500
 //#define ADC_MAX           5120 //25% zoomed out
 //#define ADC_MAX           6142 //50% zoomed out
-#define ADC_MAX              5120 //custom
+#define ADC_MAX              4095 //custom
 
 //#define ADC_MAX2            6142
 //#define   ADC_MAX2            7166 //75% zoomed out
 //#define ADC_MAX2           8120 //100% zoomed
-#define ADC_MAX2             5120 //custom
+#define ADC_MAX2             4095 //custom
 
 #define NUM_POINTS      GRAPH_WIDTH
 #define NUM_POINTS2      GRAPH_WIDTH2
@@ -163,7 +163,7 @@ void Graph_Update2(int16_t adc_val)
     uint16_t x2, y_new2;
     uint16_t prev_idx2, prev_x2, prev_y2;
 
-    if (!init_done) Graph_Init2();
+    if (!init_done2) Graph_Init2();
 
     /* --- 1. Screen position for this sample -------------------------------- */
     x2     = GRAPH_X2_0 + write_idx2;
