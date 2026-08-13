@@ -17,20 +17,22 @@
 
 //graph 2
 #define GRAPH_X2_0        0
-#define GRAPH_Y2_0        0
+#define GRAPH_Y2_0        110
 #define GRAPH_WIDTH2     320
-#define GRAPH_HEIGHT2    240
+#define GRAPH_HEIGHT2     110
 #define GRAPH_X2_1        (GRAPH_X2_0 + GRAPH_WIDTH2  - 1)
 #define GRAPH_Y2_1        (GRAPH_Y2_0 + GRAPH_HEIGHT2 - 1)
 
 //#define ADC_MAX         4095
-#define ADC_MAX           4500
+//#define ADC_MAX           4500
 //#define ADC_MAX           5120 //25% zoomed out
 //#define ADC_MAX           6142 //50% zoomed out
+#define ADC_MAX              5120 //custom
 
 //#define ADC_MAX2            6142
 //#define   ADC_MAX2            7166 //75% zoomed out
-#define ADC_MAX2           8120 //100% zoomed
+//#define ADC_MAX2           8120 //100% zoomed
+#define ADC_MAX2             5120 //custom
 
 #define NUM_POINTS      GRAPH_WIDTH
 #define NUM_POINTS2      GRAPH_WIDTH2
