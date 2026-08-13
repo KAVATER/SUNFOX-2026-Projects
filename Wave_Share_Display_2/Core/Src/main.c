@@ -91,6 +91,8 @@ volatile uint32_t adc_val2 = 0;
 uint16_t adc_buffer_dma[Num_adc_channel];
 uint16_t adc_buffer_dma2[Num_adc_channel];
 uint8_t adc_data_ready = 0;
+
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
     if (hadc->Instance == ADC1)
