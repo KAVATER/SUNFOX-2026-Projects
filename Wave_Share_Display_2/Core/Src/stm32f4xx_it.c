@@ -26,7 +26,10 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
-
+#include "adc.h"
+#include "dma.h"
+#include "spi.h"
+#include "gpio.h"
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -51,7 +54,8 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+extern volatile uint32_t adc_val;
+extern uint8_t count;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -188,7 +192,8 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_val, 1);
+   count++;
   /* USER CODE END SysTick_IRQn 1 */
 }
 

@@ -73,6 +73,8 @@ char adc_text[16];
   * @brief  The application entry point.
   * @retval int
   */
+uint8_t count = 0;
+uint8_t count_limit = 8;
 int main(void)
 {
 
@@ -97,12 +99,10 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SPI1_Init();
   MX_ADC1_Init();
-
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -145,6 +145,8 @@ int main(void)
 
   ILI9341_FillScreen(BLACK);
 
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
 
 
   while (1)
@@ -153,10 +155,19 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_val, 1);
+//	    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_val, 1);
+//	    count++;
+//
+//	    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 
+	    //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0,GPIO_PIN_SET);
+
+if(count == count_limit)
+{
 	    Graph_Update(adc_val);
-	    Graph_Update2(adc_val);
+	    count = 0;
+}
+	   // Graph_Update2(adc_val);
 	   // graph_push(adc_val);
 
      //	HAL_Delay(10);

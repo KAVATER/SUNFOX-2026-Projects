@@ -152,6 +152,9 @@ void Graph_Update(int16_t adc_val)
 
     /* --- 5. Advance pen ---------------------------------------------------- */
     write_idx = (write_idx + 1) % NUM_POINTS;
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_2);
+    //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+
 }
 
 //for graph 2
